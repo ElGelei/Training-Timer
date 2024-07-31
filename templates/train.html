@@ -5,10 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suivi d'Entraînement</title>
     <style>
-        .exercise-row { padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; }
-        .active-exercise { background-color: yellow; }
-        #timer { font-size: 2em; margin-bottom: 20px; text-align: center; }
-        #pause-button, #return-button { display: block; margin: 20px auto; padding: 10px; font-size: 1em; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            margin: 20px;
+        }
+        .exercise-row {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            border-radius: 5px;
+            width: 100%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        .active-exercise {
+            background-color: yellow;
+        }
+        #timer {
+            font-size: 2em;
+            margin: 20px;
+            text-align: center;
+        }
+        #pause-button, #return-button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 1em;
+            width: 80%;
+            max-width: 300px;
+        }
+        button {
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #pause-button {
+            background-color: #ffc107;
+            color: #fff;
+        }
+        #return-button {
+            background-color: #007bff;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
