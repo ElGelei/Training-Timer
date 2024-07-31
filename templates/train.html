@@ -4,24 +4,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suivi d'Entraînement</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        /* Votre CSS ici */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .exercise-row {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .active-exercise {
+            background-color: #f0e68c;
+        }
+        #timer {
+            font-size: 2em;
+            margin: 20px;
+            text-align: center;
+        }
+        #pause-button, #return-button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 1em;
+            width: 80%;
+            max-width: 300px;
+        }
+        button {
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #pause-button {
+            background-color: #ffc107;
+            color: #fff;
+        }
+        #return-button {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        /* Media Queries for Mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            #timer {
+                font-size: 1.5em;
+            }
+            .exercise-row {
+                padding: 15px;
+                font-size: 1em;
+            }
+            #pause-button, #return-button {
+                width: 90%;
+                font-size: 1.2em;
+            }
+        }
     </style>
 </head>
 <body>
     <h1>Entraînement en Cours</h1>
     <div id="timer">Préparation...</div>
-    <div id="exercise-list">
+    <div id="exercise-list" class="list-group">
         {% for exercise in routine %}
-            <div class="exercise-row">{{ exercise[0] }} - {{ exercise[1] }} secondes</div>
+            <div class="exercise-row list-group-item">{{ exercise[0] }} - {{ exercise[1] }} secondes</div>
         {% endfor %}
     </div>
-    <button id="pause-button" onclick="togglePause()">Mettre en pause</button>
-    <button id="return-button" style="display:none;" onclick="window.location.href='/create'">Revenir à la création de l'entraînement</button>
+    <button id="pause-button" class="btn btn-warning my-3" onclick="togglePause()">Mettre en pause</button>
+    <button id="return-button" class="btn btn-primary my-3" style="display:none;" onclick="window.location.href='/create'">Revenir à la création de l'entraînement</button>
 
-    <!-- Include the ResponsiveVoice script -->
     <script src="https://code.responsivevoice.org/responsivevoice.js?key=PsxeNux2"></script>
-
     <script>
         let exercises = JSON.parse('{{ routine | tojson | safe }}');
         let currentIndex = 0;
@@ -42,11 +111,10 @@
         }
 
         function speak(text, callback) {
-            // Check if responsiveVoice is loaded
             if (typeof responsiveVoice !== "undefined") {
                 responsiveVoice.speak(text, "UK English Female", { onend: callback });
             } else {
-                console.error("responsiveVoice is not defined");
+                console.error("responsiveVoice is not defined or could not be loaded.");
             }
         }
 
@@ -54,9 +122,15 @@
             if (currentIndex < exercises.length) {
                 let [exercise, duration] = exercises[currentIndex];
                 document.getElementById('timer').innerText = `Exercice: ${exercise} | Temps restant: ${duration}s`;
-                document.getElementsByClassName('exercise-row')[currentIndex].classList.add('active-exercise');
                 
-                speak(`Start ${exercise} for ${duration} seconds`, () => {
+                let exerciseRow = document.getElementsByClassName('exercise-row')[currentIndex];
+                if (exerciseRow) {
+                    exerciseRow.classList.add('active-exercise');
+                } else {
+                    console.error(`No element found for exercise index ${currentIndex}`);
+                }
+
+                speak(`${exercise} for ${duration} seconds`, () => {
                     countdown = parseInt(duration);
                     startCountdown();
                 });
@@ -74,7 +148,10 @@
                     document.getElementById('timer').innerText = `Exercice: ${exercises[currentIndex][0]} | Temps restant: ${countdown}s`;
                     if (countdown <= 0) {
                         clearInterval(interval);
-                        document.getElementsByClassName('exercise-row')[currentIndex].classList.remove('active-exercise');
+                        let exerciseRow = document.getElementsByClassName('exercise-row')[currentIndex];
+                        if (exerciseRow) {
+                            exerciseRow.classList.remove('active-exercise');
+                        }
                         currentIndex++;
                         startExercise();
                     }
