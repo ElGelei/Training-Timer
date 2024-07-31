@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi d'Entraînement</title>
+    <style>
+        .exercise-row { padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; }
+        .active-exercise { background-color: yellow; }
+        #timer { font-size: 2em; margin-bottom: 20px; text-align: center; }
+        #pause-button, #return-button { display: block; margin: 20px auto; padding: 10px; font-size: 1em; }
+    </style>
+</head>
+<body>
+    <h1>Entraînement en Cours</h1>
+    <div id="timer">Préparation...</div>
+    <div id="exercise-list">
+        {% for exercise in routine %}
+            <div class="exercise-row">{{ exercise[0] }} - {{ exercise[1] }} secondes</div>
+        {% endfor %}
+    </div>
+    <button id="pause-button" onclick="togglePause()">Mettre en pause</button>
+    <button id="return-button" style="display:none;" onclick="window.location.href='/create'">Revenir à la création de l'entraînement</button>
+
+    <script>
+        let exercises = JSON.parse('{{ routine | tojson | safe }}');
+        let currentIndex = 0;
+        let voices = [];
+        let isPaused = false;
+        let countdown;
+        let interval;
+
+        function togglePause() {
+            if (isPaused) {
+                isPaused = false;
+                document.getElementById('pause-button').innerText = "Mettre en pause";
+                startCountdown();
+            } else {
+                isPaused = true;
+                document.getElementById('pause-button').innerText = "Reprendre";
+                clearInterval(interval);
+            }
+        }
+
+        function speak(text, callback) {
+            let msg = new SpeechSynthesisUtterance(text);
+            msg.voice = voices.find(voice => voice.name.includes('Female') && voice.lang.startsWith('en'));
+            msg.onend = function() {
+                if (callback) callback();
+            };
+            window.speechSynthesis.speak(msg);
+        }
+
+        function startExercise() {
+            if (currentIndex < exercises.length) {
+                let [exercise, duration] = exercises[currentIndex];
+                document.getElementById('timer').innerText = `Exercice: ${exercise} | Temps restant: ${duration}s`;
+                document.getElementsByClassName('exercise-row')[currentIndex].classList.add('active-exercise');
+                
+                speak(`Start ${exercise} for ${duration} seconds`, () => {
+                    countdown = parseInt(duration);
+                    startCountdown();
+                });
+            } else {
+                document.getElementById('timer').innerText = "Entraînement terminé!";
+                document.getElementById('pause-button').style.display = 'none';
+                document.getElementById('return-button').style.display = 'block';
+            }
+        }
+
+        function startCountdown() {
+            interval = setInterval(() => {
+                if (!isPaused) {
+                    countdown--;
+                    document.getElementById('timer').innerText = `Exercice: ${exercises[currentIndex][0]} | Temps restant: ${countdown}s`;
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        document.getElementsByClassName('exercise-row')[currentIndex].classList.remove('active-exercise');
+                        currentIndex++;
+                        startExercise();
+                    }
+                }
+            }, 1000);
+        }
+
+        window.onload = () => {
+            window.speechSynthesis.onvoiceschanged = () => {
+                voices = window.speechSynthesis.getVoices();
+                startCountdownInitial();
+            };
+
+            window.speechSynthesis.getVoices(); // Trigger loading of voices
+        };
+
+        function startCountdownInitial() {
+            let countdownInitial = 3;
+            let intervalInitial = setInterval(() => {
+                if (countdownInitial > 0) {
+                    document.getElementById('timer').innerText = `Début dans ${countdownInitial}...`;
+                } else {
+                    document.getElementById('timer').innerText = "Commence maintenant!";
+                    setTimeout(startExercise, 1000);
+                    clearInterval(intervalInitial);
+                }
+                countdownInitial--;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
