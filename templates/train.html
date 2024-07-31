@@ -94,9 +94,9 @@
         function speak(text, callback) {
             try {
                 let msg = new SpeechSynthesisUtterance(text);
-                msg.voice = voices.find(voice => voice.name.includes('Female') && voice.lang.startsWith('en'));
+                msg.voice = voices.find(voice => voice.name.includes('Female') && voice.lang.startsWith('en')) || voices[0];
                 if (!msg.voice) {
-                    console.warn('No suitable voice found.');
+                    console.warn('No suitable voice found. Using default voice.');
                 }
                 msg.onend = function() {
                     if (callback) callback();
