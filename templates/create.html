@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" href="/static/icons/icon-192x192.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Création de Routine d'Entraînement</title>
@@ -99,5 +101,16 @@
 
         <button class="btn btn-success" onclick="window.location.href='/train'">Commencer l'entraînement</button>
     </div>
+    <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/static/service-worker.js').then(registration => {
+              console.log('Service Worker registered with scope:', registration.scope);
+            }, (err) => {
+              console.log('Service Worker registration failed:', err);
+            });
+          });
+        }
+      </script>
 </body>
 </html>
