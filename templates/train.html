@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="manifest" href="/static/manifest.json">
-    <link rel="icon" href="/static/icons/icon-192x192.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suivi d'Entraînement</title>
@@ -20,7 +18,7 @@
             min-height: 100vh;
         }
         h1 {
-            margin-bottom: 20px;
+            margin: 20px;
         }
         .exercise-row {
             padding: 10px;
@@ -28,9 +26,9 @@
             border: 1px solid #ccc;
             background-color: #fff;
             border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 600px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
         }
         .active-exercise {
             background-color: #f0e68c;
@@ -40,7 +38,7 @@
             margin: 20px;
             text-align: center;
         }
-        #pause-button, #return-button {
+        #pause-button, #stop-button, #return-button {
             display: block;
             margin: 10px auto;
             padding: 10px;
@@ -55,6 +53,10 @@
         }
         #pause-button {
             background-color: #ffc107;
+            color: #fff;
+        }
+        #stop-button {
+            background-color: #dc3545;
             color: #fff;
         }
         #return-button {
@@ -74,7 +76,7 @@
                 padding: 15px;
                 font-size: 1em;
             }
-            #pause-button, #return-button {
+            #pause-button, #stop-button, #return-button {
                 width: 90%;
                 font-size: 1.2em;
             }
@@ -84,15 +86,15 @@
 <body>
     <h1>Entraînement en Cours</h1>
     <div id="timer">Préparation...</div>
-    <div id="exercise-list" class="list-group">
+    <div id="exercise-list">
         {% for exercise in routine %}
-            <div class="exercise-row list-group-item">{{ exercise[0] }} - {{ exercise[1] }} secondes</div>
+            <div class="exercise-row">{{ exercise[0] }} - {{ exercise[1] }} secondes</div>
         {% endfor %}
     </div>
-    <button id="pause-button" class="btn btn-warning my-3" onclick="togglePause()">Mettre en pause</button>
-    <button id="return-button" class="btn btn-primary my-3" style="display:none;" onclick="window.location.href='/create'">Revenir à la création de l'entraînement</button>
+    <button id="pause-button" onclick="togglePause()">Mettre en pause</button>
+    <button id="stop-button" onclick="stopTraining()">Arrêter l'entraînement</button>
+    <button id="return-button" style="display:none;" onclick="window.location.href='/create'">Revenir à la création de l'entraînement</button>
 
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=PsxeNux2"></script>
     <script>
         let exercises = JSON.parse('{{ routine | tojson | safe }}');
         let currentIndex = 0;
@@ -110,6 +112,11 @@
                 document.getElementById('pause-button').innerText = "Reprendre";
                 clearInterval(interval);
             }
+        }
+
+        function stopTraining() {
+            clearInterval(interval);  // Arrêter le timer
+            window.location.href = '/create';  // Rediriger vers /create
         }
 
         function speak(text, callback) {
@@ -132,7 +139,7 @@
                     console.error(`No element found for exercise index ${currentIndex}`);
                 }
 
-                speak(`${exercise} for ${duration} seconds`, () => {
+                speak(`Start ${exercise} for ${duration} seconds`, () => {
                     countdown = parseInt(duration);
                     startCountdown();
                 });
@@ -179,16 +186,5 @@
             }, 1000);
         }
     </script>
-    <script>
-        if ('serviceWorker' in navigator) {
-          window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/static/service-worker.js').then(registration => {
-              console.log('Service Worker registered with scope:', registration.scope);
-            }, (err) => {
-              console.log('Service Worker registration failed:', err);
-            });
-          });
-        }
-      </script>
 </body>
 </html>
